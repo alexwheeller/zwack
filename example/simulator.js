@@ -7,6 +7,7 @@ const args = parseArgs(process.argv.slice(2));
 var containsFTMS = false;
 var containsRSC = false;
 var containsCSP = false;
+var containsCSC = false;
 var containsSPD = false;
 var containsPWR = false;
 var containsCAD = false;
@@ -18,6 +19,7 @@ if ( args.variable === undefined ) {
   containsFTMS = args.variable.includes('ftms');
   containsRSC  = args.variable.includes('rsc');
   containsCSP  = args.variable.includes('csp');
+  containsCSC  = args.variable.includes('csc');
   containsSPD  = args.variable.includes('speed');
   containsPWR  = args.variable.includes('power');
   containsCAD  = args.variable.includes('cadence');
@@ -191,7 +193,6 @@ var notifyCadenceCSP = function() {
   setTimeout(notifyCadenceCSP, 60 * 1000/(Math.random() * randomness + cadence));
 };
 
-
 // Simulate Cycling Power - Broadcasting Power and Cadence & Speed
 // This setup is NOT ideal. Cadence and Speed changes will be erratic 
 //   - takes ~2 sec to stabilize and be reflected in output
@@ -240,7 +241,22 @@ var notifyCPCS = function() {
   }
 
   try {
-    zwackBLE.notifyCSP({'watts': watts, 'rev_count': stroke_count, 'wheel_count': wheel_count, 'spd_int': spd_int, 'cad_int': cad_int, 'cad_time': cad_time, 'cadence': cadence, 'powerMeterSpeed': powerMeterSpeed});
+    justPower = {'watts': watts};
+    justCadence = {'rev_count': stroke_count, 'cad_int': cad_int, 'cad_time': cad_time, 'cadence': cadence};
+    justSpeed = {'wheel_count': wheel_count, 'spd_int': spd_int, 'powerMeterSpeed': powerMeterSpeed};
+
+    if (containsCSP) {
+      payload = justPower;
+      if (containsCAD) { payload = { ...payload, ...justCadence}; }
+      if (containsSPD) { payload = { ...payload, ...justSpeed}; }      
+      zwackBLE.notifyCSP(payload);//{'watts': watts, 'rev_count': stroke_count, 'wheel_count': wheel_count, 'spd_int': spd_int, 'cad_int': cad_int, 'cad_time': cad_time, 'cadence': cadence, 'powerMeterSpeed': powerMeterSpeed});
+    }
+
+    if (containsCSC) {
+      payload = justCadence;
+      if (containsSPD) { payload = { ...payload, ...justSpeed}; }
+      zwackBLE.notifyCSC(payload);
+    }
   }
   catch( e ) {
     console.error(e);
@@ -324,7 +340,8 @@ listParams();
 
 // Comment or Uncomment each line depending on what is needed
 if ( containsCSP && containsPWR && !containsCAD && !containsSPD ) { notifyPowerCSP(); }	// Simulate Cycling Power Service - Broadcasting Power ONLY
-if ( containsCSP && containsPWR &&  containsCAD && !containsSPD ) { notifyCadenceCSP(); }	// Simulate Cycling Power Service  - Broadcasting Power and Cadence
-if ( containsCSP && containsPWR &&  containsCAD &&  containsSPD ) { notifyCPCS(); }			// Simulate Cycling Power Service - Broadcasting Power and Cadence and Speed
+//if ( containsCSP && containsPWR &&  containsCAD && !containsSPD ) { notifyCadenceCSP(); }	// Simulate Cycling Power Service  - Broadcasting Power and Cadence
+if ( (containsCSC || containsCSP) && (containsPWR || containsCAD || containsSPD) ) { notifyCPCS(); }			// Simulate Cycling Power Service - Broadcasting Power and Cadence and Speed
+//if ( containsCSC ) { notifyCPCS(); }			// Simulate Cycling Cadence Service - Broadcasting Cadence and Speed
 if ( containsFTMS ) { notifyPowerFTMS(); } 													// Simulate FTMS Smart Trainer - Broadcasting Power and Cadence
-if ( containsRSC  ) { notifyRSC(); }														// Simulate Running Speed and Cadence - Broadcasting Speed and Cadence
+if ( containsRSC ) { notifyRSC(); }														// Simulate Running Speed and Cadence - Broadcasting Speed and Cadence

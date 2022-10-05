@@ -3,12 +3,14 @@
 Simulate/Implement a Bluetooth Low Energy sensor that can send:
 
   * Cycling Power and Cadence (CSP Bluetooth profile)
+  * Cycling Speed and Cadence (CSC Bluetooth profile)
   * Running Speed and Cadence (RSC Bluetooth profile)
   * Cycling Power and Cadence (FTMS Bluetooth profile - partial support)
 
 Zwack has many possible uses, here are some examples:
 
   * Simulate an indoor bike trainer (turbo) generating cyclist power,cadence & speed data to test bike computers fitness, or virtual indoor bike apps. 
+  * Simulate an indoor bike trainer (turbo) generating cyclist cadence & speed data to test bike computers fitness, or virtual indoor bike apps. (1816)
   * Simulate a runner's speed and pace test bike computers fitness, or virtual indoor bike apps. 
   * Integrate a common treadmill with Zwift, sending data from the treadmill to the Zwift game via bluetooth
   * Simulate an indoor bike trainer (turbo) that is able to receive SetTarget (wattage) commands from test bike fitness apps (eg: BreakAway: Indoor Training) for testing. (This method is currently using the Cycling Power Profile with the addition of Wahoo's extension)
@@ -34,6 +36,7 @@ You may need to install Xcode on Mac to compile the `bleno` Bluetooth module.
 You can see a lot of debug information if you run the simulator or your app with the DEBUG environment variable set to 
 
   * csp  - Cycling Power and Cadence messages
+  * csc  - Cycling Power and Cadence messages
   * rsc  - Running Speed and Cadence messages
   * ftms - Fitness Machine Messages
   * ble  - Bluetooth low energy messages
